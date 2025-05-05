@@ -43,16 +43,14 @@ def game_state(mat):
             if mat[i][j] == 0:
                 return 'not over'
     # Check for same cells that touch each other
-    for i in range(len(mat)-1):
-        for j in range(len(mat[0])-1):
-            if mat[i][j] == mat[i+1][j] or mat[i][j] == mat[i][j+1]:
+    for i in range(len(mat)):
+        for j in range(len(mat)-1):
+            if mat[i][j] == mat[i][j+1]:
                 return 'not over'
-    for k in range(len(mat)-1):  # Last row
-        if mat[len(mat)-1][k] == mat[len(mat)-1][k+1]:
-            return 'not over'
-    for j in range(len(mat)-1):  # Last column
-        if mat[j][len(mat)-1] == mat[j+1][len(mat)-1]:
-            return 'not over'
+    for i in range(len(mat)-1):
+        for j in range(len(mat)):
+            if mat[i][j] == mat[i+1][j]:
+                return 'not over'
     return 'lose'
 
 ###########
