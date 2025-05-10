@@ -4,5 +4,6 @@
 # python
 *.pyc
 __pycache__
-
+*.ipynb
+!test.ipynb
 outcmaes

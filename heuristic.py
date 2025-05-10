@@ -1,12 +1,13 @@
 import numpy as np
 
 class Heuristic:
-    def __init__(self, params):
+    def __init__(self, params, base_weight = 200000.0):
         """Initialize heuristic with adjustable parameters."""
         self.params = params
         self.SCORE_MONOTONICITY_WEIGHT = params[0] * 10  # Scale for optimization
         self.SCORE_EMPTY_WEIGHT = params[1] * 1000       # Scale for optimization
-
+        self.base_weight = base_weight
+        
     def _score_heur(self, board_tuple):
         """Compute the heuristic score for the entire 2048 board with caching."""
         row_scores = sum(self.score_row(row) for row in board_tuple)
@@ -20,16 +21,17 @@ class Heuristic:
         empty = 0
         monotonicity_left = 0.0
         monotonicity_right = 0.0
+        monotonicity_power = 4.0
         ranks = [0 if tile == 0 else int(np.log2(tile)) for tile in row]
         for rank in ranks:
             if rank == 0:
                 empty += 1
         for i in range(1, 4):
             if ranks[i-1] > ranks[i]:
-                monotonicity_left += ranks[i-1] ** 4.0 - ranks[i] ** 4.0
+                monotonicity_left += ranks[i-1] ** monotonicity_power - ranks[i] ** monotonicity_power
             else:
-                monotonicity_right += ranks[i] ** 4.0 - ranks[i-1] ** 4.0
-        score = (200000.0 +
+                monotonicity_right += ranks[i] ** monotonicity_power - ranks[i-1] ** monotonicity_power
+        score = (self.base_weight +
                  self.SCORE_EMPTY_WEIGHT * empty -
                  self.SCORE_MONOTONICITY_WEIGHT * min(monotonicity_left, monotonicity_right))
         return score

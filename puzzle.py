@@ -2,6 +2,8 @@ from tkinter import Frame, Label, CENTER
 import random
 import logic
 import constants as c
+import time
+from joblib import Parallel, delayed
 
 def gen():
     return random.randint(0, c.GRID_LEN - 1)
@@ -9,7 +11,7 @@ def gen():
 def test_move(board, direction):
     board_copy = [row[:] for row in board]
     if direction == 0:
-        board_copy, _, _ = logic.up(board_copy)  # Sửa để lấy 3 giá trị
+        board_copy, _, _ = logic.up(board_copy)
     elif direction == 1:
         board_copy, _, _ = logic.down(board_copy)
     elif direction == 2:
@@ -25,7 +27,7 @@ class GameGrid(Frame):
         Frame.__init__(self)
         self.auto_move = auto_move
         self.depth_limit = depth_limit
-        self.score = 0  # Theo dõi điểm số
+        self.score = 0
         if not silent:
             self.grid()
             self.master.title('2048')
@@ -46,7 +48,7 @@ class GameGrid(Frame):
         }
 
         self.grid_cells = []
-        self.score_label = None  # Nhãn để hiển thị điểm số
+        self.score_label = None
         if not silent:
             self.init_grid()
         self.matrix = logic.new_game(c.GRID_LEN)
@@ -62,11 +64,9 @@ class GameGrid(Frame):
             self.mainloop()
 
     def init_grid(self):
-        # Tạo khung nền chính
-        background = Frame(self, bg=c.BACKGROUND_COLOR_GAME, width=c.SIZE, height=c.SIZE + 50)  # Tăng chiều cao để chứa nhãn điểm
+        background = Frame(self, bg=c.BACKGROUND_COLOR_GAME, width=c.SIZE, height=c.SIZE + 50)
         background.grid()
 
-        # Thêm nhẫn điểm số
         self.score_label = Label(
             master=background,
             text=f"Score: {self.score}",
@@ -79,7 +79,6 @@ class GameGrid(Frame):
         )
         self.score_label.grid(row=0, column=0, columnspan=c.GRID_LEN, pady=(10, 0))
 
-        # Tạo lưới trò chơi
         grid_frame = Frame(
             background,
             bg=c.BACKGROUND_COLOR_GAME,
@@ -128,7 +127,6 @@ class GameGrid(Frame):
                         bg=c.BACKGROUND_COLOR_DICT[new_number],
                         fg=c.CELL_COLOR_DICT[new_number]
                     )
-        # Cập nhật nhãn điểm số
         if not self.silent and self.score_label:
             self.score_label.configure(text=f"Score: {self.score}")
         if not self.silent:
@@ -155,6 +153,7 @@ class GameGrid(Frame):
                 if not self.silent:
                     self.grid_cells[1][1].configure(text="You", bg=c.BACKGROUND_COLOR_CELL_EMPTY)
                     self.grid_cells[1][2].configure(text="Lose!", bg=c.BACKGROUND_COLOR_CELL_EMPTY)
+                    time.sleep(1)
                     self.quit()
 
     def key_down(self, event):
@@ -190,20 +189,36 @@ class GameGrid(Frame):
         return False
 
     def run_ai_loop(self):
-        def step():
-            if logic.game_state(self.matrix) in ["win", "lose"]:
-                return
-            self.ai_play_step()
-            self.after(1, step)
-        step()
+        if self.silent:
+            # Chế độ không GUI: chạy vòng lặp trực tiếp
+            while logic.game_state(self.matrix) not in ["win", "lose"]:
+                if not self.ai_play_step():
+                    break
+        else:
+            # Chế độ GUI: vòng lặp với self.update()
+            while logic.game_state(self.matrix) not in ["win", "lose"]:
+                if not self.ai_play_step():
+                    break
+                self.update()
+                self.update_idletasks()
 
     def run_single_game(self):
-        """Run a single game until completion and return the result and score."""
+        """Run a single game until completion and return the result, score, and max tile."""
+        max_tile = 0
         while self.game_result is None:
+            # Update max tile
+            for row in self.matrix:
+                max_tile = max(max_tile, max(row))
             if not self.ai_play_step():
                 break
-        return self.game_result, self.score
+        # Final check for max tile
+        for row in self.matrix:
+            max_tile = max(max_tile, max(row))
+        return self.game_result, self.score, max_tile
 
+    def get_history(self):
+        return self.history_matrixs
+    
 class GameSimulator:
     def __init__(self, num_games, expectimax_func, depth_limit):
         self.num_games = num_games
@@ -211,25 +226,78 @@ class GameSimulator:
         self.depth_limit = depth_limit
         self.wins = 0
         self.scores = []
-
+        self.reached_2048 = 0
+        self.reached_4096 = 0
+        self.reached_8192 = 0
     def run_simulation(self):
-        """Run the specified number of games and calculate win percentage, max score, and average score."""
+        """Run the specified number of games and calculate win percentage, max score, average score,
+        and percentages of reaching 2048 and 4096."""
         for i in range(self.num_games):
             print(f"Running game {i+1}/{self.num_games}")
             game = GameGrid(auto_move=True, expectimax_func=self.expectimax_func, 
                           depth_limit=self.depth_limit, silent=True)
-            result, score = game.run_single_game()
-            print(f"Game {i+1} completed. Score: {score}")
+            result, score, max_tile = game.run_single_game()
+            print(f"Game {i+1} completed. Score: {score}, Max Tile: {max_tile}")
             self.scores.append(score)
-            if score > 20000:
+            if max_tile >= 2048:
+                self.reached_2048 += 1
                 self.wins += 1
+            if max_tile >= 4096:
+                self.reached_4096 += 1
             game.destroy()
 
         win_percentage = (self.wins / self.num_games) * 100
+        percentage_2048 = (self.reached_2048 / self.num_games) * 100
+        percentage_4096 = (self.reached_4096 / self.num_games) * 100
         max_score = max(self.scores) if self.scores else 0
         avg_score = sum(self.scores) / len(self.scores) if self.scores else 0
         print(f"Played {self.num_games} games. Won {self.wins} times. "
               f"Win percentage: {win_percentage:.2f}%")
+        print(f"Reached 2048: {self.reached_2048} times. Percentage: {percentage_2048:.2f}%")
+        print(f"Reached 4096: {self.reached_4096} times. Percentage: {percentage_4096:.2f}%")
         print(f"Max score: {max_score}")
         print(f"Average score: {avg_score:.2f}")
-        return win_percentage, max_score, avg_score
+        return win_percentage, max_score, avg_score, percentage_2048, percentage_4096
+    
+    def run_simulation_parallel(self, num_jobs=4):
+        """Run the specified number of games in parallel using joblib and calculate 
+        win percentage, max score, average score, and percentages of reaching 2048 and 4096."""
+        
+        def run_single_game():
+            """Run a single game and return its score."""
+            game = GameGrid(auto_move=True, expectimax_func=self.expectimax_func, 
+                          depth_limit=self.depth_limit, silent=True)
+            result, score, max_tile = game.run_single_game()
+            game.destroy()
+            return result, score, max_tile
+        
+        results = Parallel(n_jobs=num_jobs, backend='loky')(
+            delayed(run_single_game)() for _ in range(self.num_games)
+        )
+        
+        for result, score, max_tile in results:
+            self.scores.append(score)
+            if max_tile >= 2048:
+                self.reached_2048 += 1
+                self.wins += 1
+            if max_tile >= 4096:
+                self.reached_4096 += 1
+            if max_tile >= 8192:
+                self.reached_8192 += 1
+        
+        win_percentage = (self.wins / self.num_games) * 100
+        percentage_2048 = (self.reached_2048 / self.num_games) * 100
+        percentage_4096 = (self.reached_4096 / self.num_games) * 100
+        percentage_8192 = (self.reached_8192 / self.num_games) * 100
+        max_score = max(self.scores) if self.scores else 0
+        avg_score = sum(self.scores) / len(self.scores) if self.scores else 0
+        
+        print(f"Played {self.num_games} games. Won {self.wins} times. "
+              f"Win percentage: {win_percentage:.2f}%")
+        print(f"Reached 2048: {self.reached_2048} times. Percentage: {percentage_2048:.2f}%")
+        print(f"Reached 4096: {self.reached_4096} times. Percentage: {percentage_4096:.2f}%")
+        print(f"Reached 8192: {self.reached_8192} times. Percentage: {percentage_8192:.2f}%")
+        print(f"Max score: {max_score}")
+        print(f"Average score: {avg_score:.2f}")
+        
+        return win_percentage, max_score, avg_score, percentage_2048, percentage_4096
