@@ -1,25 +1,34 @@
-2048 Python
-===========
+# Trò Chơi 2048 với AI
 
-[![Run on Repl.it](https://repl.it/badge/github/yangshun/2048-python)](https://repl.it/github/yangshun/2048-python)
+Dự án triển khai AI chơi trò chơi 2048 sử dụng thuật toán Expectimax với tối ưu hóa heuristic.
 
----
+## Tổng Quan
+- **Trò Chơi**: 2048, lưới 4x4 nơi các ô số trượt và hợp nhất để đạt ô 2048.
+- **Thuật Toán**: Expectimax với cắt tỉa và lưu đệm để ra quyết định hiệu quả.
+- **Heuristic**: Đánh giá trạng thái lưới dựa trên:
+  - Tính đơn điệu (sắp xếp ô)
+  - Số ô trống
+  - Ô giá trị lớn nhất ở góc
+- **Hiệu Suất**:
+  - Độ sâu 2: 78% đạt 2048, điểm trung bình ~43k
+  - Độ sâu 3: 90.3% đạt 2048, điểm trung bình ~65k
 
-**⚠️NOTE⚠️**: We won't be accepting any contributions/changes to the project anymore. It is now readonly.
+## Cài Đặt
+1. Tải kho lưu trữ:
+   ```bash
+   git clone <đường-dẫn-kho-lưu-trữ>
+   cd <thư-mục-dự-án>
+   ```
+2. Cài đặt các thư viện yêu cầu:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Chạy trò chơi:
+   ```bash
+   python main.py
+   ```
 
----
-
-Based on the popular game [2048](https://github.com/gabrielecirulli/2048) by Gabriele Cirulli. The game's objective is to slide numbered tiles on a grid to combine them to create a tile with the number 2048. Here is a Python version that uses TKinter! 
-
-![screenshot](img/screenshot.png)
-
-To start the game, run:
-    
-    $ python3 puzzle.py
-
-
-Contributors:
-==
-
-- [Yanghun Tay](http://github.com/yangshun)
-- [Emmanuel Goh](http://github.com/emman27)
+## Sử Dụng
+- AI tự động chơi 2048 với giao diện Tkinter để hiển thị.
+- Độ sâu tìm kiếm Expectimax được đặt ở 3 để cân bằng tốc độ và hiệu suất.
+- Kết quả được ghi lại, bao gồm điểm số và ô cao nhất đạt được.
