@@ -45,7 +45,7 @@ class ExpectimaxOptimizer:
         total = 0.0
         
         # Cắt tỉa nhánh xác suất thấp khi có nhiều ô trống
-        if num_open > 4 and prob_factor * 0.9 < 0.1:  # Tương tự mã gốc
+        if num_open > 4 and prob_factor * 0.9 < 0.1: 
             score = self.score_heur_board(board_tuple)
             self.expectimax_cache[cache_key] = score
             return score

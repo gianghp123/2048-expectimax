@@ -259,7 +259,7 @@ class GameSimulator:
         print(f"Average score: {avg_score:.2f}")
         return win_percentage, max_score, avg_score, percentage_2048, percentage_4096
     
-    def run_simulation_parallel(self, num_jobs=4):
+    def run_simulation_parallel(self, num_jobs=4, verbose=True):
         """Run the specified number of games in parallel using joblib and calculate 
         win percentage, max score, average score, and percentages of reaching 2048 and 4096."""
         
@@ -292,12 +292,13 @@ class GameSimulator:
         max_score = max(self.scores) if self.scores else 0
         avg_score = sum(self.scores) / len(self.scores) if self.scores else 0
         
-        print(f"Played {self.num_games} games. Won {self.wins} times. "
-              f"Win percentage: {win_percentage:.2f}%")
-        print(f"Reached 2048: {self.reached_2048} times. Percentage: {percentage_2048:.2f}%")
-        print(f"Reached 4096: {self.reached_4096} times. Percentage: {percentage_4096:.2f}%")
-        print(f"Reached 8192: {self.reached_8192} times. Percentage: {percentage_8192:.2f}%")
-        print(f"Max score: {max_score}")
-        print(f"Average score: {avg_score:.2f}")
+        if verbose:
+            print(f"Played {self.num_games} games. Won {self.wins} times. "
+                f"Win percentage: {win_percentage:.2f}%")
+            print(f"Reached 2048: {self.reached_2048} times. Percentage: {percentage_2048:.2f}%")
+            print(f"Reached 4096: {self.reached_4096} times. Percentage: {percentage_4096:.2f}%")
+            print(f"Reached 8192: {self.reached_8192} times. Percentage: {percentage_8192:.2f}%")
+            print(f"Max score: {max_score}")
+            print(f"Average score: {avg_score:.2f}")
         
         return win_percentage, max_score, avg_score, percentage_2048, percentage_4096
