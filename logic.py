@@ -1,9 +1,6 @@
 import random
 import constants as c
 
-#######
-# Task 1a #
-#######
 
 def new_game(n):
     matrix = []
@@ -13,9 +10,6 @@ def new_game(n):
     matrix = add_two(matrix)
     return matrix
 
-###########
-# Task 1b #
-###########
 
 def add_two(mat):
     a = random.randint(0, len(mat)-1)
@@ -27,22 +21,12 @@ def add_two(mat):
     mat[a][b] = 2 if x < 0.9 else 4
     return mat
 
-###########
-# Task 1c #
-###########
 
 def game_state(mat):
-    # Check for win cell
-    # for i in range(len(mat)):
-    #     for j in range(len(mat[0])):
-    #         if mat[i][j] == 2048:
-    #             return 'win'
-    # Check for any zero entries
     for i in range(len(mat)):
         for j in range(len(mat[0])):
             if mat[i][j] == 0:
                 return 'not over'
-    # Check for same cells that touch each other
     for i in range(len(mat)):
         for j in range(len(mat)-1):
             if mat[i][j] == mat[i][j+1]:
@@ -53,10 +37,6 @@ def game_state(mat):
                 return 'not over'
     return 'lose'
 
-###########
-# Task 2a #
-###########
-
 def reverse(mat):
     new = []
     for i in range(len(mat)):
@@ -65,10 +45,6 @@ def reverse(mat):
             new[i].append(mat[i][len(mat[0])-j-1])
     return new
 
-###########
-# Task 2b #
-###########
-
 def transpose(mat):
     new = []
     for i in range(len(mat[0])):
@@ -76,10 +52,6 @@ def transpose(mat):
         for j in range(len(mat)):
             new[i].append(mat[j][i])
     return new
-
-##########
-# Task 3 #
-##########
 
 def cover_up(mat):
     new = [[0] * c.GRID_LEN for _ in range(c.GRID_LEN)]

@@ -3,14 +3,13 @@ from puzzle import test_move
 
 class ExpectimaxOptimizer:
     def __init__(self, heuristic_func):
-        """Khởi tạo optimizer với hàm heuristic."""
         self.heuristic_func = heuristic_func
         self.heuristic_cache = {}      # Cache cho heuristic
         self.expectimax_cache = {}     # Cache cho nút Chance
         self.move_node_cache = {}      # Cache mới cho nút Player
 
     def score_heur_board(self, board_tuple):
-        """Đánh giá bảng bằng hàm heuristic với caching."""
+        """Evaluate the board using the heuristic function with caching."""
         if board_tuple in self.heuristic_cache:
             return self.heuristic_cache[board_tuple]
         board = np.array(board_tuple, dtype=np.int64)
@@ -19,11 +18,11 @@ class ExpectimaxOptimizer:
         return score
     
     def execute_move(self, board, move):
-        """Thực hiện nước đi bằng hàm test_move."""
+        """Execute a move on the board."""
         return test_move(board, move)
     
     def score_tilechoose_node(self, board_tuple, cprob, depth, max_depth):
-        """Đánh giá nút đặt ô với caching và cắt tỉa cải tiến."""
+        """Evaluate the board using Expectimax with caching."""
         cache_key = (board_tuple, depth)
         if cache_key in self.expectimax_cache:
             return self.expectimax_cache[cache_key]
@@ -71,7 +70,7 @@ class ExpectimaxOptimizer:
         return average_score
     
     def score_move_node(self, board_tuple, cprob, depth, max_depth):
-        """Đánh giá nút chọn nước đi với caching."""
+        """Evaluate the move on board"""
         cache_key = (board_tuple, depth)
         if cache_key in self.move_node_cache:
             return self.move_node_cache[cache_key]
@@ -90,7 +89,7 @@ class ExpectimaxOptimizer:
         return best
     
     def expectimax(self, board, max_depth=3):
-        """Xác định nước đi tốt nhất bằng Expectimax."""
+        """Find the best move using Expectimax."""
         best_score = -np.inf
         best_move = -1
         board = np.array(board, dtype=np.int64)

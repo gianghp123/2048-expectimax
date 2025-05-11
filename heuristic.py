@@ -4,13 +4,13 @@ class Heuristic:
     def __init__(self, params, base_weight=200000.0):
         """Initialize heuristic with adjustable parameters."""
         self.params = params
-        self.SCORE_MONOTONICITY_WEIGHT = params[0]  # Scale for optimization
-        self.SCORE_EMPTY_WEIGHT = params[1]         # Scale for optimization
-        self.SCORE_CORNER_WEIGHT = params[2]        # Scale for optimization
+        self.SCORE_MONOTONICITY_WEIGHT = params[0] 
+        self.SCORE_EMPTY_WEIGHT = params[1] 
+        self.SCORE_CORNER_WEIGHT = params[2] 
         self.base_weight = base_weight
 
     def _score_heur(self, board):
-        """Compute the heuristic score for the entire 2048 board with debug prints."""
+        """Compute the heuristic score for the entire 2048 board."""
         total_monotonicity = 0.0
         total_empty = sum(1 for row in board for tile in row if tile == 0)
 
@@ -23,7 +23,6 @@ class Heuristic:
             col_monotonicity = self.score_row(col)
             total_monotonicity += col_monotonicity
 
-        # Corner bonus: Check if max tile is in any of the four corners
         max_tile_value = max(tile for row in board for tile in row)
         corner_bonus = 0.0
         if max_tile_value > 0 and (
@@ -34,13 +33,8 @@ class Heuristic:
         ):
             corner_bonus = self.SCORE_CORNER_WEIGHT * np.log2(max_tile_value)
 
-        # Tính các điểm thành phần
         empty_score = self.SCORE_EMPTY_WEIGHT * total_empty
         monotonicity_score = -self.SCORE_MONOTONICITY_WEIGHT * total_monotonicity
-
-        print(f"Empty Score: {empty_score}")
-        print(f"Monotonicity Score: {monotonicity_score}")
-        print(f"Corner Bonus: {corner_bonus}")
 
         total_score = self.base_weight + empty_score + monotonicity_score + corner_bonus
         return total_score
